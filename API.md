@@ -232,7 +232,7 @@ All UI endpoints require authentication.
 
 #### POST `/api/create-ui`
 
-Generate a new UI component through interactive browser session with 21st.dev.
+Generate a new UI component using the configured UI provider (Magic UI or v0.dev).
 
 **Request Body:**
 ```json
@@ -260,24 +260,36 @@ Generate a new UI component through interactive browser session with 21st.dev.
 {
   "success": true,
   "data": {
-    "content": [
-      {
-        "type": "text",
-        "text": "import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';\nimport { Button } from '@/components/ui/button';\n\nexport function PricingTable() {\n  return (\n    // Component code here\n  );\n}\n\n## Shadcn/ui instructions\nAfter you add the component, make sure to add the component to the project. If you can't resolve components from demo code,\nMake sure to install shadcn/ui components from the demo code missing imports\n\nExamples of importing shadcn/ui components:\nif these imports can't be resolved:\n```tsx\nimport { Card, CardHeader } from \"@/components/ui/card\"\nimport { Button } from \"@/components/ui/button\"\n```\n\nthen run this command:\n```bash\nnpx shadcn@latest add card button\n```"
-      }
-    ]
+    "text": "import { Card } from '@/components/ui/card';\n\nexport function PricingTable() {\n  return (\n    // Component code here\n  );\n}\n\n## Shadcn/ui instructions\n...",
+    "previewUrl": "https://v0.dev/chat/abc123",
+    "provider": "v0"
   },
   "timestamp": "2025-01-11T12:34:56.789Z"
 }
 ```
 
-**Behavior:**
-1. Server opens a browser window to `http://21st.dev/magic-chat`
-2. User interacts with 21st.dev to generate the component
-3. Component data is sent back via callback server
-4. Server returns the component code with integration instructions
+**Response Fields:**
 
-**Timeout:** 10 minutes (600000ms)
+| Field | Type | Present | Description |
+|-------|------|---------|-------------|
+| `text` | string | Always | Component code with integration instructions |
+| `previewUrl` | string | v0 only | Live preview URL (v0.dev chat interface) |
+| `provider` | string | Always | Active provider: `magic` or `v0` |
+
+**Behavior:**
+
+**Magic UI Provider** (default):
+1. Server opens browser window to `http://21st.dev/magic-chat`
+2. User interacts with 21st.dev to generate component
+3. Component data sent back via callback server
+4. Server returns component code
+
+**v0.dev Provider**:
+1. Server makes direct API call to v0.dev Platform API
+2. Component generated instantly via AI
+3. Server returns component code with preview URL
+
+**Timeout:** 10 minutes (600000ms) - Magic UI only
 
 **cURL Example:**
 ```bash
@@ -325,16 +337,21 @@ Fetch UI component inspiration and examples from 21st.dev library without genera
 {
   "success": true,
   "data": {
-    "content": [
-      {
-        "type": "text",
-        "text": "Here are some modern login form examples:\n\n1. **Minimal Login Form**\n   - Email/password fields\n   - Social login buttons\n   - Forgot password link\n\n2. **Two-Column Login**\n   - Left: Brand/image\n   - Right: Login form\n\n[Additional examples and code snippets]"
-      }
-    ]
+    "text": "Here are some modern login form examples:\n\n1. **Minimal Login Form**\n   - Email/password fields\n   - Social login buttons\n   - Forgot password link\n\n2. **Two-Column Login**\n   - Left: Brand/image\n   - Right: Login form\n\n[Additional examples and code snippets]",
+    "previewUrl": "https://v0.dev/chat/abc123",
+    "provider": "v0"
   },
   "timestamp": "2025-01-11T12:34:56.789Z"
 }
 ```
+
+**Response Fields:**
+
+| Field | Type | Present | Description |
+|-------|------|---------|-------------|
+| `text` | string | Always | Component examples and inspiration |
+| `previewUrl` | string | v0 only | Live preview URL (v0.dev chat interface) |
+| `provider` | string | Always | Active provider: `magic` or `v0` |
 
 **cURL Example:**
 ```bash
@@ -376,22 +393,30 @@ Refine and improve an existing UI component.
 | `absolutePathToRefiningFile` | string | Yes | Absolute path to the file to refine |
 | `fileContent` | string | No | Existing component code (if not provided, reads from file) |
 | `context` | string | Yes | Specific aspects to improve (styling, layout, etc.) |
+| `sessionId` | string | No | Session ID from previous v0 response (enables chat continuity) |
 
 **Response 200:**
 ```json
 {
   "success": true,
   "data": {
-    "content": [
-      {
-        "type": "text",
-        "text": "import { motion } from 'framer-motion';\n\nexport function Button() {\n  return (\n    <motion.button\n      whileHover={{ scale: 1.05 }}\n      whileTap={{ scale: 0.95 }}\n      className=\"bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition-all duration-300\"\n    >\n      Click me\n    </motion.button>\n  );\n}\n\n## Changes Made:\n1. Added Framer Motion for smooth animations\n2. Implemented gradient background\n3. Added hover and tap effects\n4. Enhanced with shadow and transitions"
-      }
-    ]
+    "text": "import { motion } from 'framer-motion';\n\nexport function Button() {\n  return (\n    <motion.button\n      whileHover={{ scale: 1.05 }}\n      className=\"bg-gradient-to-r from-blue-500 to-purple-600...\"\n    >\n      Click me\n    </motion.button>\n  );\n}\n\n## Changes Made:\n1. Added Framer Motion for animations\n2. Implemented gradient background\n...",
+    "previewUrl": "https://v0.dev/chat/abc123",
+    "sessionId": "abc123",
+    "provider": "v0"
   },
   "timestamp": "2025-01-11T12:34:56.789Z"
 }
 ```
+
+**Response Fields:**
+
+| Field | Type | Present | Description |
+|-------|------|---------|-------------|
+| `text` | string | Always | Refined component code with change description |
+| `previewUrl` | string | v0 only | Live preview URL (v0.dev chat interface) |
+| `sessionId` | string | v0 only | Session ID for continued refinements (v0.dev chat ID) |
+| `provider` | string | Always | Active provider: `magic` or `v0` |
 
 **cURL Example:**
 ```bash

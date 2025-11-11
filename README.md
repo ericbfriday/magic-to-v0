@@ -5,11 +5,12 @@ Production-ready Model Context Protocol (MCP) server with Hono.js REST API and c
 ## Features
 
 ### Core Functionality
+- **Hybrid UI Providers**: Choose between 21st.dev Magic UI or v0.dev Platform API
 - **UI Component Generation**: AI-powered creation of modern React UI components
 - **Component Library**: Access to curated component library from 21st.dev
-- **Component Refinement**: Improve and enhance existing UI components
+- **Component Refinement**: Improve and enhance existing UI components with session continuity (v0)
 - **Logo Search**: Search and convert company logos to JSX/TSX/SVG format
-- **Real-time Previews**: Interactive browser-based component generation
+- **Real-time Previews**: Interactive browser-based generation (Magic UI) or preview URLs (v0)
 
 ### Server Modes
 - **STDIO Mode**: Original MCP protocol over standard input/output
@@ -34,6 +35,7 @@ Production-ready Model Context Protocol (MCP) server with Hono.js REST API and c
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Configuration](#configuration)
+  - [UI Provider Configuration](#ui-provider-configuration)
 - [Authentication Setup](#authentication-setup)
 - [API Documentation](#api-documentation)
 - [MCP Tool Documentation](#mcp-tool-documentation)
@@ -131,12 +133,17 @@ npx @modelcontextprotocol/inspector node dist/index.js
 | `PORT` | number | `3000` | HTTP server port |
 | `HOST` | string | `0.0.0.0` | HTTP server host |
 | `SERVER_MODE` | enum | `dual` | Server mode: `http`, `stdio`, or `dual` |
-| `API_KEY` | string | - | 21st.dev Magic API key |
+| **UI Provider** | | | |
+| `UI_PROVIDER` | enum | `magic` | UI provider: `magic` (21st.dev) or `v0` (v0.dev) |
+| `API_KEY` | string | - | 21st.dev Magic API key (required if `UI_PROVIDER=magic`) |
 | `BASE_URL` | string | `https://magic.21st.dev` | 21st.dev API base URL |
+| `V0_API_KEY` | string | - | v0.dev API key (required if `UI_PROVIDER=v0`) |
 | `DEBUG` | boolean | `false` | Enable debug mode (uses localhost:3005) |
+| **Authentication** | | | |
 | `AUTH_ENABLED` | boolean | `true` | Enable/disable authentication |
 | `AUTH_METHODS` | string | `api-key` | Comma-separated auth methods |
 | `AUTH_API_KEYS` | string | - | Comma-separated valid API keys |
+| **Logging** | | | |
 | `LOG_LEVEL` | enum | `info` | Log level: `debug`, `info`, `warn`, `error` |
 | `LOG_FORMAT` | enum | `json` | Log format: `json` or `pretty` |
 
@@ -176,6 +183,107 @@ Use cases:
 - Maximum flexibility
 - Support both local and remote clients
 - Development and testing
+
+### UI Provider Configuration
+
+The server supports multiple UI component generation providers, allowing you to choose between 21st.dev Magic UI and v0.dev Platform API based on your needs.
+
+#### Available Providers
+
+| Provider | Description | Features | Requirements |
+|----------|-------------|----------|--------------|
+| **Magic UI** (21st.dev) | Browser-based component generation | Interactive design, Real-time preview | 21st.dev API key |
+| **v0** (v0.dev) | Direct API-based generation | Preview URLs, Session continuity, File arrays | v0.dev API key |
+
+#### Provider Selection
+
+Configure your preferred provider using the `UI_PROVIDER` environment variable:
+
+```env
+# Use Magic UI (default - recommended for most users)
+UI_PROVIDER=magic
+API_KEY=your-21st-dev-api-key
+
+# Use v0.dev Platform API
+UI_PROVIDER=v0
+V0_API_KEY=your-v0-api-key
+```
+
+#### Magic UI Provider (Default)
+
+**Best for**: Interactive component design, real-time browser previews
+
+**Setup**:
+```env
+UI_PROVIDER=magic
+API_KEY=your-21st-dev-api-key
+BASE_URL=https://magic.21st.dev
+```
+
+**Features**:
+- Browser-based interactive component generation
+- Real-time visual feedback
+- Automatic shadcn/ui component detection
+- No additional costs beyond 21st.dev subscription
+
+**Limitations**:
+- Requires browser for component creation
+- No preview URLs in response
+- No session continuity for refinements
+
+#### v0.dev Provider
+
+**Best for**: Automated workflows, CI/CD integration, session-based refinements
+
+**Setup**:
+```env
+UI_PROVIDER=v0
+V0_API_KEY=your-v0-api-key
+```
+
+Get your v0.dev API key from: [https://v0.dev/chat/settings/keys](https://v0.dev/chat/settings/keys)
+
+**Features**:
+- Direct API-based generation (no browser required)
+- Preview URLs for live component testing
+- Session continuity with `sessionId` for iterative refinements
+- File arrays with component code
+- Chat history support
+
+**Limitations**:
+- Requires v0.dev subscription
+- Per-request API costs
+
+#### Provider Comparison
+
+| Feature | Magic UI | v0.dev |
+|---------|----------|--------|
+| Browser Required | ✅ Yes (create) | ❌ No |
+| Preview URLs | ❌ No | ✅ Yes |
+| Session Continuity | ❌ No | ✅ Yes |
+| File Arrays | ❌ No | ✅ Yes |
+| Setup Complexity | Low | Low |
+| Best For | Interactive design | Automation |
+
+#### Switching Providers
+
+To switch between providers:
+
+1. Update `UI_PROVIDER` in `.env`
+2. Ensure required API key is configured
+3. Restart the server
+
+```bash
+# Switch to v0
+UI_PROVIDER=v0 V0_API_KEY=your-key npm start
+
+# Switch back to Magic UI
+UI_PROVIDER=magic API_KEY=your-key npm start
+```
+
+**Note**: No code changes are required. The server automatically uses the configured provider for all UI operations.
+
+For detailed provider documentation, see [PROVIDER_GUIDE.md](PROVIDER_GUIDE.md).
 
 ## Authentication Setup
 
