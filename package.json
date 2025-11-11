@@ -46,7 +46,6 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "type-check": "tsc --noEmit",
     "clean": "shx rm -rf dist",
-    "prepare": "npm run build:prod",
     "docker:build": "docker build -t magic-mcp-server .",
     "docker:run": "docker run -p 3000:3000 --env-file .env magic-mcp-server"
   },
@@ -54,6 +53,7 @@
   "license": "MIT",
   "dependencies": {
     "@hono/node-server": "^1.13.7",
+    "@hono/zod-validator": "^0.4.1",
     "@modelcontextprotocol/sdk": "^1.8.0",
     "hono": "^4.7.11",
     "jose": "^5.9.6",

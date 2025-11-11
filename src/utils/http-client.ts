@@ -37,11 +37,11 @@ class HttpClient {
     options: RequestInit = {}
   ): Promise<HttpResponse<T>> {
     const url = `${this.config.baseUrl}${endpoint}`;
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'User-Agent': 'Magic-MCP-Server/1.0',
       ...(this.config.apiKey ? { 'x-api-key': this.config.apiKey } : {}),
-      ...options.headers,
+      ...options.headers as Record<string, string>,
     };
 
     logger.debug(`HTTP ${method} ${url}`, { endpoint, method });

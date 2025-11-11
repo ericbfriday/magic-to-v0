@@ -17,7 +17,6 @@ import {
   refineUiSchema,
   logoSearchSchema,
 } from '../utils/validation.js';
-import type { MCPToolResponse } from '../types/index.js';
 import { promises as fs } from 'fs';
 
 /**
@@ -190,19 +189,17 @@ export function createMCPServer(): Server {
         case '21st_magic_component_builder': {
           const validated = createUiSchema.parse(args);
           const result = await uiService.createUi(validated);
-          const response: MCPToolResponse = {
-            content: [{ type: 'text', text: result }],
+          return {
+            content: [{ type: 'text' as const, text: result }],
           };
-          return response;
         }
 
         case '21st_magic_component_inspiration': {
           const validated = fetchUiSchema.parse(args);
           const result = await uiService.fetchUi(validated);
-          const response: MCPToolResponse = {
-            content: [{ type: 'text', text: result }],
+          return {
+            content: [{ type: 'text' as const, text: result }],
           };
-          return response;
         }
 
         case '21st_magic_component_refiner': {
@@ -212,19 +209,17 @@ export function createMCPServer(): Server {
             'utf-8'
           );
           const result = await uiService.refineUi(validated, fileContent);
-          const response: MCPToolResponse = {
-            content: [{ type: 'text', text: result }],
+          return {
+            content: [{ type: 'text' as const, text: result }],
           };
-          return response;
         }
 
         case 'logo_search': {
           const validated = logoSearchSchema.parse(args);
           const result = await logoService.searchLogos(validated);
-          const response: MCPToolResponse = {
-            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+          return {
+            content: [{ type: 'text' as const, text: JSON.stringify(result, null, 2) }],
           };
-          return response;
         }
 
         default:

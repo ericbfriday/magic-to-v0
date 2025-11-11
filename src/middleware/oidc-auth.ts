@@ -39,7 +39,7 @@ export class OIDCAuth {
         throw new Error(`Failed to fetch OIDC configuration: ${response.status}`);
       }
 
-      const config = await response.json();
+      const config = await response.json() as any;
 
       if (config.jwks_uri && !this.config.jwksUri) {
         this.config.jwksUri = config.jwks_uri;

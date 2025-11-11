@@ -45,7 +45,7 @@ logoSearch.post(
           error: error.message,
           timestamp: new Date().toISOString(),
         };
-        return c.json(response, error.statusCode);
+        return c.json(response, error.statusCode as any);
       }
 
       const response: ApiResponse = {
@@ -53,7 +53,7 @@ logoSearch.post(
         error: 'Internal server error',
         timestamp: new Date().toISOString(),
       };
-      return c.json(response, 500);
+      return c.json(response, 500 as any);
     }
   }
 );
