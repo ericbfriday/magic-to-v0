@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  magic-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: magic-mcp-server
+    ports:
+      - "${PORT:-3000}:3000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - SERVER_MODE=http
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - magic-mcp-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  magic-mcp-network:
+    driver: bridge
