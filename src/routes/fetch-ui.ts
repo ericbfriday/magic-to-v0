@@ -5,7 +5,7 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { fetchUiSchema } from '../utils/validation.js';
-import { uiService } from '../services/ui-service.js';
+import { getUiProvider } from '../services/providers/ui-provider-factory.js';
 import { logger } from '../utils/logger.js';
 import { AppError } from '../utils/errors.js';
 import type { ApiResponse } from '../types/index.js';
@@ -26,11 +26,16 @@ fetchUi.post(
     });
 
     try {
-      const result = await uiService.fetchUi(request);
+      const provider = getUiProvider();
+      const providerResponse = await provider.fetchUi(request);
 
-      const response: ApiResponse<{ text: string }> = {
+      const response: ApiResponse<{ text: string; previewUrl?: string; provider: string }> = {
         success: true,
-        data: { text: result },
+        data: {
+          text: providerResponse.text,
+          previewUrl: providerResponse.previewUrl,
+          provider: providerResponse.provider,
+        },
         timestamp: new Date().toISOString(),
       };
 

@@ -59,16 +59,33 @@ function parseJSON<T>(value: string | undefined, fallback: T): T {
 export function loadConfig(): Config {
   const cliArgs = parseArguments();
 
+  const providerType = (process.env.UI_PROVIDER || 'magic') as 'magic' | 'v0';
+  const magicApiKey = cliArgs.apiKey || process.env.TWENTY_FIRST_API_KEY || process.env.API_KEY;
+  const v0ApiKey = process.env.V0_API_KEY;
+
   return {
     // Server configuration
     port: parseInt(process.env.PORT || '3000', 10),
     host: process.env.HOST || '0.0.0.0',
     mode: (process.env.SERVER_MODE || 'dual') as 'stdio' | 'http' | 'dual',
 
-    // API configuration
-    apiKey: cliArgs.apiKey || process.env.TWENTY_FIRST_API_KEY || process.env.API_KEY,
+    // API configuration (legacy - maintained for backward compatibility)
+    apiKey: magicApiKey,
     baseUrl: process.env.BASE_URL ||
       (process.env.DEBUG === 'true' ? 'http://localhost:3005' : 'https://magic.21st.dev'),
+
+    // UI Provider configuration
+    uiProvider: {
+      type: providerType,
+      magic: magicApiKey ? {
+        apiKey: magicApiKey,
+        baseUrl: process.env.BASE_URL ||
+          (process.env.DEBUG === 'true' ? 'http://localhost:3005' : 'https://magic.21st.dev'),
+      } : undefined,
+      v0: v0ApiKey ? {
+        apiKey: v0ApiKey,
+      } : undefined,
+    },
 
     // Authentication configuration
     auth: {
@@ -109,6 +126,15 @@ export function validateConfig(config: Config): void {
 
   if (config.port < 1 || config.port > 65535) {
     errors.push('Port must be between 1 and 65535');
+  }
+
+  // Validate UI provider configuration
+  if (config.uiProvider.type === 'magic' && !config.uiProvider.magic) {
+    errors.push('Magic UI provider selected but not configured (missing API key)');
+  }
+
+  if (config.uiProvider.type === 'v0' && !config.uiProvider.v0) {
+    errors.push('v0 provider selected but not configured (missing V0_API_KEY)');
   }
 
   if (config.auth.enabled) {

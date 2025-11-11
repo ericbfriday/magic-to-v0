@@ -6,7 +6,7 @@ import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import { refineUiSchema } from '../utils/validation.js';
-import { uiService } from '../services/ui-service.js';
+import { getUiProvider } from '../services/providers/ui-provider-factory.js';
 import { logger } from '../utils/logger.js';
 import { AppError, ValidationError } from '../utils/errors.js';
 import type { ApiResponse } from '../types/index.js';
@@ -14,9 +14,10 @@ import { promises as fs } from 'fs';
 
 const refineUi = new Hono();
 
-// Extended schema for API that includes fileContent
+// Extended schema for API that includes fileContent and sessionId
 const refineUiApiSchema = refineUiSchema.extend({
   fileContent: z.string().optional(),
+  sessionId: z.string().optional(),
 });
 
 /**
@@ -53,18 +54,30 @@ refineUi.post(
         }
       }
 
-      const result = await uiService.refineUi(
+      const provider = getUiProvider();
+      const providerResponse = await provider.refineUi(
         {
           userMessage: request.userMessage,
           absolutePathToRefiningFile: request.absolutePathToRefiningFile,
           context: request.context,
         },
-        fileContent
+        fileContent,
+        request.sessionId
       );
 
-      const response: ApiResponse<{ text: string }> = {
+      const response: ApiResponse<{
+        text: string;
+        previewUrl?: string;
+        sessionId?: string;
+        provider: string;
+      }> = {
         success: true,
-        data: { text: result },
+        data: {
+          text: providerResponse.text,
+          previewUrl: providerResponse.previewUrl,
+          sessionId: providerResponse.sessionId,
+          provider: providerResponse.provider,
+        },
         timestamp: new Date().toISOString(),
       };
 

@@ -12,6 +12,18 @@ export interface Config {
   apiKey?: string;
   baseUrl: string;
 
+  // UI Provider configuration
+  uiProvider: {
+    type: 'magic' | 'v0';
+    magic?: {
+      apiKey: string;
+      baseUrl: string;
+    };
+    v0?: {
+      apiKey: string;
+    };
+  };
+
   // Authentication configuration
   auth: {
     enabled: boolean;

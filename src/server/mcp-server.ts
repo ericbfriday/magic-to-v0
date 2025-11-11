@@ -9,7 +9,7 @@ import {
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { logger } from '../utils/logger.js';
-import { uiService } from '../services/ui-service.js';
+import { getUiProvider } from '../services/providers/ui-provider-factory.js';
 import { logoService } from '../services/logo-service.js';
 import {
   createUiSchema,
@@ -188,17 +188,19 @@ export function createMCPServer(): Server {
       switch (name) {
         case '21st_magic_component_builder': {
           const validated = createUiSchema.parse(args);
-          const result = await uiService.createUi(validated);
+          const provider = getUiProvider();
+          const response = await provider.createUi(validated);
           return {
-            content: [{ type: 'text' as const, text: result }],
+            content: [{ type: 'text' as const, text: response.text }],
           };
         }
 
         case '21st_magic_component_inspiration': {
           const validated = fetchUiSchema.parse(args);
-          const result = await uiService.fetchUi(validated);
+          const provider = getUiProvider();
+          const response = await provider.fetchUi(validated);
           return {
-            content: [{ type: 'text' as const, text: result }],
+            content: [{ type: 'text' as const, text: response.text }],
           };
         }
 
@@ -208,9 +210,10 @@ export function createMCPServer(): Server {
             validated.absolutePathToRefiningFile,
             'utf-8'
           );
-          const result = await uiService.refineUi(validated, fileContent);
+          const provider = getUiProvider();
+          const response = await provider.refineUi(validated, fileContent);
           return {
-            content: [{ type: 'text' as const, text: result }],
+            content: [{ type: 'text' as const, text: response.text }],
           };
         }
 
